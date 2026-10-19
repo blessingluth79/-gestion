@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCC | Administration - Membres et Chefs</title>
+    <link rel="stylesheet" href="front-end/style.css" />
+  </head>
+  <body>
+    <script>
+      if (!localStorage.getItem("occ-auth")) {
+        location.replace("front-end/login.html");
+      }
+    </script>
+
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img src="logo.jpg" alt="Logo OCC" class="logo" />
+        <div class="brand">Office Congolaise de Contrôle</div>
+      </div>
+      <nav class="nav">
+        <a href="front-end/index.html">Accueil</a>
+        <a href="front-end/departement.html">Départements</a>
+        <a href="admin.html" class="active">Administration</a>
+        <a href="#" id="logout" title="Déconnexion">Déconnexion</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <p class="eyebrow">Administration des accès</p>
+        <h1>Gestion des utilisateurs et chefs</h1>
+        <p class="subtitle">
+          Créez les comptes des membres et les comptes des chefs de département.
+        </p>
+      </section>
+
+      <!-- ========== MEMBRES ========== -->
+      <section class="admin-section">
+        <h2 class="admin-section-title">Membres</h2>
+        <div class="table-wrap">
+          <table class="inventory-table" id="membres-table">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Matricule</th>
+                <th>Département</th>
+                <th>Mot de passe par défaut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="membres-body"></tbody>
+          </table>
+        </div>
+        <div class="admin-actions">
+          <button type="button" class="secondary" id="ajouter-membre-btn">+ Ajouter un membre</button>
+        </div>
+      </section>
+
+      <!-- ========== CHEFS ========== -->
+      <section class="admin-section">
+        <h2 class="admin-section-title">Chefs de département</h2>
+        <div class="table-wrap">
+          <table class="inventory-table" id="chefs-table">
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Matricule chef</th>
+                <th>Département</th>
+                <th>Mot de passe par défaut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="chefs-body"></tbody>
+          </table>
+        </div>
+        <div class="admin-actions">
+          <button type="button" class="secondary" id="ajouter-chef-btn">+ Ajouter un chef</button>
+        </div>
+      </section>
+
+      <!-- ========== FORMULAIRE MEMBRE ========== -->
+      <div id="membre-form-wrapper" style="display:none;" class="form-admin">
+        <form id="membre-form">
+          <div>
+            <label for="form-matricule">Matricule</label>
+            <input type="text" id="form-matricule" placeholder="Matricule" required autocomplete="off">
+          </div>
+          <div>
+            <label for="form-departement">Département</label>
+            <select id="form-departement" required></select>
+          </div>
+          <div>
+            <label for="form-password">Mot de passe</label>
+            <input type="text" id="form-password" placeholder="Mot de passe par défaut" required autocomplete="off">
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="primary">Enregistrer</button>
+            <button type="button" id="membre-annuler-btn" class="secondary">Annuler</button>
+          </div>
+          <input type="hidden" id="membre-edit-id" />
+          <input type="hidden" id="membre-edit-type" value="membre" />
+          <p class="login-error" id="membre-form-error" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <!-- ========== FORMULAIRE CHEF ========== -->
+      <div id="chef-form-wrapper" style="display:none;" class="form-admin">
+        <form id="chef-form">
+          <div>
+            <label for="chef-form-matricule">Matricule chef</label>
+            <input type="text" id="chef-form-matricule" placeholder="Matricule chef" required autocomplete="off">
+          </div>
+          <div>
+            <label for="chef-form-departement">Département</label>
+            <select id="chef-form-departement" required></select>
+          </div>
+          <div>
+            <label for="chef-form-password">Mot de passe</label>
+            <input type="text" id="chef-form-password" placeholder="Mot de passe chef" required autocomplete="off">
+          </div>
+          <div class="btn-row">
+            <button type="submit" class="primary">Enregistrer</button>
+            <button type="button" id="chef-annuler-btn" class="secondary">Annuler</button>
+          </div>
+          <input type="hidden" id="chef-edit-id" />
+          <input type="hidden" id="chef-edit-type" value="chef" />
+          <p class="login-error" id="chef-form-error" aria-live="polite"></p>
+        </form>
+      </div>
+    </main>
+
+    <footer class="footer">
+      © Office Congolaise de Contrôle · Département des systèmes d'information
+    </footer>
+
+    <script src="front-end/projet.js"></script>
+    <script>
+      // ---------- Départements ----------
+      function remplirDepartements(selectEl) {
+        selectEl.innerHTML = "";
+        DEPARTEMENTS.forEach(function (d) {
+          const opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = d.nom;
+          selectEl.appendChild(opt);
+        });
+      }
+
+      // ---------- Comptes membres ----------
+      function chargerComptes() {
+        try {
+          return JSON.parse(localStorage.getItem("occ-comptes") || "{}");
+        } catch (e) {
+          return {};
+        }
+      }
+      function sauverComptes(comptes) {
+        localStorage.setItem("occ-comptes", JSON.stringify(comptes));
+      }
+
+      // ---------- Comptes chefs ----------
+      function chargerChefs() {
+        try {
+          return JSON.parse(localStorage.getItem("occ-chefs") || "{}");
+        } catch (e) {
+          return {};
+        }
+      }
+      function sauverChefs(chefs) {
+        localStorage.setItem("occ-chefs", JSON.stringify(chefs));
+      }
+
+      function nomDept(deptId) {
+        const d = DEPARTEMENTS.find(function (x) { return x.id === deptId; });
+        return d ? d.nom : deptId;
+      }
+      function masquer(mdp) {
+        return "•".repeat(mdp.length || 8);
+      }
+
+      // ---------- Dessiner Membres ----------
+      function dessinerMembres() {
+        const comptes = chargerComptes();
+        const tbody = document.getElementById("membres-body");
+        tbody.innerHTML = "";
+        let n = 0;
+        Object.keys(comptes).forEach(function (deptId) {
+          const c = comptes[deptId];
+          if (!c || !c.matricule) return;
+          n++;
+          const tr = document.createElement("tr");
+
+          const tdNum = document.createElement("td");
+          tdNum.textContent = n;
+          tr.appendChild(tdNum);
+
+          const tdMat = document.createElement("td");
+          tdMat.textContent = c.matricule;
+          tr.appendChild(tdMat);
+
+          const tdDept = document.createElement("td");
+          tdDept.textContent = nomDept(deptId);
+          tr.appendChild(tdDept);
+
+          const tdMdp = document.createElement("td");
+          tdMdp.textContent = masquer(c.password);
+          tr.appendChild(tdMdp);
+
+          const tdAct = document.createElement("td");
+          tdAct.style.display = "flex";
+          tdAct.style.gap = "6px";
+
+          const btnMod = document.createElement("button");
+          btnMod.type = "button";
+          btnMod.textContent = "Modifier";
+          btnMod.className = "secondary";
+          btnMod.style.padding = "6px 12px";
+          btnMod.style.fontSize = "0.85rem";
+          btnMod.onclick = function () { ouvrirMembreForm(deptId, c); };
+
+          const btnSup = document.createElement("button");
+          btnSup.type = "button";
+          btnSup.textContent = "Supprimer";
+          btnSup.className = "secondary";
+          btnSup.style.padding = "6px 12px";
+          btnSup.style.fontSize = "0.85rem";
+          btnSup.style.color = "#a31212";
+          btnSup.onclick = function () {
+            if (confirm("Supprimer ce membre ?")) {
+              delete comptes[deptId];
+              sauverComptes(comptes);
+              dessinerMembres();
+            }
+          };
+
+          tdAct.appendChild(btnMod);
+          tdAct.appendChild(btnSup);
+          tr.appendChild(tdAct);
+          tbody.appendChild(tr);
+        });
+      }
+
+      // ---------- Dessiner Chefs ----------
+      function dessinerChefs() {
+        const chefs = chargerChefs();
+        const tbody = document.getElementById("chefs-body");
+        tbody.innerHTML = "";
+        let n = 0;
+        Object.keys(chefs).forEach(function (deptId) {
+          const c = chefs[deptId];
+          if (!c || !c.matricule) return;
+          n++;
+          const tr = document.createElement("tr");
+
+          const tdNum = document.createElement("td");
+          tdNum.textContent = n;
+          tr.appendChild(tdNum);
+
+          const tdMat = document.createElement("td");
+          tdMat.textContent = c.matricule;
+          tr.appendChild(tdMat);
+
+          const tdDept = document.createElement("td");
+          tdDept.textContent = nomDept(deptId);
+          tr.appendChild(tdDept);
+
+          const tdMdp = document.createElement("td");
+          tdMdp.textContent = masquer(c.password);
+          tr.appendChild(tdMdp);
+
+          const tdAct = document.createElement("td");
+          tdAct.style.display = "flex";
+          tdAct.style.gap = "6px";
+
+          const btnMod = document.createElement("button");
+          btnMod.type = "button";
+          btnMod.textContent = "Modifier";
+          btnMod.className = "secondary";
+          btnMod.style.padding = "6px 12px";
+          btnMod.style.fontSize = "0.85rem";
+          btnMod.onclick = function () { ouvrirChefForm(deptId, c); };
+
+          const btnSup = document.createElement("button");
+          btnSup.type = "button";
+          btnSup.textContent = "Supprimer";
+          btnSup.className = "secondary";
+          btnSup.style.padding = "6px 12px";
+          btnSup.style.fontSize = "0.85rem";
+          btnSup.style.color = "#a31212";
+          btnSup.onclick = function () {
+            if (confirm("Supprimer ce chef ?")) {
+              delete chefs[deptId];
+              sauverChefs(chefs);
+              dessinerChefs();
+            }
+          };
+
+          tdAct.appendChild(btnMod);
+          tdAct.appendChild(btnSup);
+          tr.appendChild(tdAct);
+          tbody.appendChild(tr);
+        });
+      }
+
+      // ---------- Ouvrir formulaire Membre ----------
+      function ouvrirMembreForm(deptId, c) {
+        const wrapper = document.getElementById("membre-form-wrapper");
+        const editId = document.getElementById("membre-edit-id");
+        const editType = document.getElementById("membre-edit-type");
+        const matInput = document.getElementById("form-matricule");
+        const deptInput = document.getElementById("form-departement");
+        const pwdInput = document.getElementById("form-password");
+        const err = document.getElementById("membre-form-error");
+
+        err.textContent = "";
+        document.getElementById("membre-form").reset();
+        remplirDepartements(deptInput);
+        editType.value = "membre";
+
+        if (c) {
+          editId.value = deptId;
+          matInput.value = c.matricule;
+          deptInput.value = deptId;
+          pwdInput.value = c.password;
+          deptInput.disabled = true;
+        } else {
+          editId.value = "";
+          matInput.value = "";
+          deptInput.value = "";
+          pwdInput.value = "";
+          deptInput.disabled = false;
+        }
+
+        wrapper.style.display = "block";
+        matInput.focus();
+      }
+
+      // ---------- Ouvrir formulaire Chef ----------
+      function ouvrirChefForm(deptId, c) {
+        const wrapper = document.getElementById("chef-form-wrapper");
+        const editId = document.getElementById("chef-edit-id");
+        const editType = document.getElementById("chef-edit-type");
+        const matInput = document.getElementById("chef-form-matricule");
+        const deptInput = document.getElementById("chef-form-departement");
+        const pwdInput = document.getElementById("chef-form-password");
+        const err = document.getElementById("chef-form-error");
+
+        err.textContent = "";
+        document.getElementById("chef-form").reset();
+        remplirDepartements(deptInput);
+        editType.value = "chef";
+
+        if (c) {
+          editId.value = deptId;
+          matInput.value = c.matricule;
+          deptInput.value = deptId;
+          pwdInput.value = c.password;
+          deptInput.disabled = true;
+        } else {
+          editId.value = "";
+          matInput.value = "";
+          deptInput.value = "";
+          pwdInput.value = "";
+          deptInput.disabled = false;
+        }
+
+        wrapper.style.display = "block";
+        matInput.focus();
+      }
+
+      // ---------- Annuler ----------
+      document.getElementById("membre-annuler-btn").addEventListener("click", function () {
+        document.getElementById("membre-form-wrapper").style.display = "none";
+        document.getElementById("membre-form-error").textContent = "";
+      });
+      document.getElementById("chef-annuler-btn").addEventListener("click", function () {
+        document.getElementById("chef-form-wrapper").style.display = "none";
+        document.getElementById("chef-form-error").textContent = "";
+      });
+
+      // ---------- Ajouter ----------
+      document.getElementById("ajouter-membre-btn").addEventListener("click", function () {
+        ouvrirMembreForm(null, null);
+      });
+      document.getElementById("ajouter-chef-btn").addEventListener("click", function () {
+        ouvrirChefForm(null, null);
+      });
+
+      // ---------- Soumettre Membre ----------
+      document.getElementById("membre-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const editId = document.getElementById("membre-edit-id").value;
+        const matricule = document.getElementById("form-matricule").value.trim();
+        const deptId = document.getElementById("form-departement").value;
+        const password = document.getElementById("form-password").value;
+        const err = document.getElementById("membre-form-error");
+        err.textContent = "";
+
+        if (!matricule) { err.textContent = "Veuillez saisir un matricule."; return; }
+        if (!password) { err.textContent = "Veuillez saisir un mot de passe."; return; }
+
+        const comptes = chargerComptes();
+        for (const dId of Object.keys(comptes)) {
+          const c = comptes[dId];
+          if (c && c.matricule === matricule && dId !== editId) {
+            err.textContent = "Ce matricule existe déjà sur un autre département.";
+            return;
+          }
+        }
+
+        comptes[editId || deptId] = { matricule: matricule, password: password };
+        sauverComptes(comptes);
+        document.getElementById("membre-form-wrapper").style.display = "none";
+        dessinerMembres();
+      });
+
+      // ---------- Soumettre Chef ----------
+      document.getElementById("chef-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const editId = document.getElementById("chef-edit-id").value;
+        const matricule = document.getElementById("chef-form-matricule").value.trim();
+        const deptId = document.getElementById("chef-form-departement").value;
+        const password = document.getElementById("chef-form-password").value;
+        const err = document.getElementById("chef-form-error");
+        err.textContent = "";
+
+        if (!matricule) { err.textContent = "Veuillez saisir un matricule."; return; }
+        if (!password) { err.textContent = "Veuillez saisir un mot de passe."; return; }
+
+        const chefs = chargerChefs();
+        for (const dId of Object.keys(chefs)) {
+          const c = chefs[dId];
+          if (c && c.matricule === matricule && dId !== editId) {
+            err.textContent = "Ce matricule existe déjà sur un autre département.";
+            return;
+          }
+        }
+
+        chefs[editId || deptId] = { matricule: matricule, password: password };
+        sauverChefs(chefs);
+        document.getElementById("chef-form-wrapper").style.display = "none";
+        dessinerChefs();
+      });
+
+      // ---------- Initialisation ----------
+      remplirDepartements(document.getElementById("form-departement"));
+      remplirDepartements(document.getElementById("chef-form-departement"));
+      dessinerMembres();
+      dessinerChefs();
+    </script>
+  </body>
+</html>

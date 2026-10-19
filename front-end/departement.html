@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCC | Départements</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script>
+      if (!localStorage.getItem("occ-auth")) {
+        location.replace("login.html");
+      }
+    </script>
+
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img src="../logo.jpg" alt="Logo OCC" class="logo" />
+        <div class="brand">Office Congolais de Contrôle</div>
+      </div>
+      <nav class="nav">
+        <a href="index.html">Accueil</a>
+        <a href="departement.html" class="active">Départements</a>
+        <a href="../chef-login.html">Chef Département</a>
+        <a href="#" id="logout" title="Déconnexion">Déconnexion</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <p class="eyebrow">Identification du parc informatique</p>
+        <h1>Choisissez un département</h1>
+        <p class="subtitle">
+          Sélectionnez un département pour consulter son inventaire,
+          mois par mois.
+        </p>
+      </section>
+
+      <!-- Les cartes sont générées par le script plus bas -->
+      <section class="dept-grid" id="dept-grid"></section>
+    </main>
+
+    <footer class="footer">
+      © Office Congolais de Contrôle · Département des systèmes d'information
+    </footer>
+
+    <script src="projet.js"></script>
+    <script>
+      // Pour chaque département on crée une carte cliquable
+      const grille = document.getElementById("dept-grid");
+
+      DEPARTEMENTS.forEach((d) => {
+        const nbMois = moisRenseignes(d.id); // nombre de mois ayant des données
+        const carte = document.createElement("a");
+        carte.className = "dept-card";
+        carte.href = "service.html?dept=" + d.id;
+        carte.innerHTML =
+          '<span class="dept-icon">' + d.nom.charAt(0) + "</span>" +
+          "<h2>" + d.nom + "</h2>" +
+          "<p>" + (nbMois === 0
+            ? "Aucun inventaire saisi"
+            : nbMois + " mois renseigné" + (nbMois > 1 ? "s" : "")) + "</p>" +
+          '<span class="dept-link">Ouvrir l\'inventaire →</span>';
+        grille.appendChild(carte);
+      });
+    </script>
+  </body>
+</html>

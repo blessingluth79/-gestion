@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCC | Parc informatique</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script>
+      if (!localStorage.getItem("occ-auth")) {
+        location.replace("login.html");
+      }
+    </script>
+
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img src="../logo.jpg" alt="Logo OCC" class="logo" />
+        <div class="brand">Office Congolais de Contrôle</div>
+      </div>
+      <nav class="nav">
+        <a href="index.html" class="active">Accueil</a>
+        <a href="departement.html">Départements</a>
+        <a href="../chef-login.html">Chef Département</a>
+        <a href="#" id="logout" title="Déconnexion">Déconnexion</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <p class="eyebrow">Département des systèmes d'information · Kinshasa/Gombe</p>
+        <h1>Office Congolais de Contrôle</h1>
+        <h3>Identification du parc informatique</h3>
+
+        <div class="actions">
+          <a href="departement.html" class="button-link primary">Voir les identifications</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      © Office Congolais de Contrôle · Département des systèmes d'information
+    </footer>
+
+    <script src="projet.js"></script>
+  </body>
+</html>

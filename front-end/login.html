@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCC | Connexion</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="login-wrapper">
+      <form class="login-card" id="login-form" autocomplete="off">
+        <div class="login-header">
+          <img src="../logo.jpg" alt="Logo OCC" class="login-logo" />
+          <h1>Authentification</h1>
+          <p class="login-subtitle">
+            Office Congolais de Contrôle
+          </p>
+        </div>
+
+        <div class="login-body">
+          <label for="matricule">Matricule</label>
+          <input
+            type="text"
+            id="matricule"
+            name="matricule"
+            placeholder="Matricule"
+            required
+            autocomplete="off"
+          />
+
+          <label for="departement">Département</label>
+          <select id="departement" name="departement" required></select>
+
+          <label for="password">Mot de passe</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Mot de passe"
+            required
+            autocomplete="new-password"
+          />
+
+          <p class="login-error" id="login-error" aria-live="polite"></p>
+        </div>
+
+        <div class="login-footer">
+          <button type="submit" class="primary">Se connecter</button>
+        </div>
+      </form>
+
+      <footer class="footer">
+        © Office Congolais de Contrôle · Département des systèmes d'information
+      </footer>
+    </div>
+
+    <script src="projet.js"></script>
+    <script>
+      // Génère un matricule et un mot de passe par défaut pour chaque département
+      const CREDENTIALS_DEFAUT = {};
+      DEPARTEMENTS.forEach(function (d) {
+        CREDENTIALS_DEFAUT[d.id] = {
+          matricule: d.id.toUpperCase().replace(/[^A-Z0-9]/g, "") + "001",
+          password: d.id + "123",
+        };
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.nom;
+        document.getElementById("departement").appendChild(opt);
+      });
+
+      // Comptes créés par l'administrateur (localStorage)
+      function chargerComptes() {
+        try {
+          return JSON.parse(localStorage.getItem("occ-comptes") || "{}");
+        } catch (e) {
+          return {};
+        }
+      }
+
+      document.getElementById("login-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const matricule = document.getElementById("matricule").value.trim();
+        const pass = document.getElementById("password").value;
+        const deptId = document.getElementById("departement").value;
+        const err = document.getElementById("login-error");
+        err.textContent = "";
+
+        const comptes = chargerComptes();
+        const compte = comptes[deptId];
+        const creds = CREDENTIALS_DEFAUT[deptId] || {};
+
+        const matched =
+          (compte && compte.matricule === matricule && compte.password === pass) ||
+          (creds.matricule === matricule && creds.password === pass);
+
+        if (matched) {
+          localStorage.setItem("occ-auth", matricule);
+          localStorage.setItem("occ-dept", deptId);
+          window.location.href = "service.html?dept=" + deptId;
+        } else {
+          err.textContent = "Matricule ou mot de passe incorrect.";
+        }
+      });
+    </script>
+  </body>
+</html>

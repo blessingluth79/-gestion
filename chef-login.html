@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCC | Connexion Chef</title>
+    <link rel="stylesheet" href="front-end/style.css" />
+  </head>
+  <body>
+    <div class="login-wrapper">
+      <form class="login-card" id="chef-login-form" autocomplete="off">
+        <div class="login-header">
+          <img src="logo.jpg" alt="Logo OCC" class="login-logo" />
+          <h1>Connexion Chef</h1>
+          <p class="login-subtitle">
+            Office Congolais de Contrôle
+          </p>
+        </div>
+
+        <div class="login-body">
+          <label for="chef-departement">Département</label>
+          <select id="chef-departement" required></select>
+
+          <label for="chef-matricule">Matricule Chef</label>
+          <input
+            type="text"
+            id="chef-matricule"
+            name="chef-matricule"
+            placeholder="Matricule chef"
+            required
+            autocomplete="off"
+          />
+
+          <label for="chef-password">Mot de passe</label>
+          <input
+            type="password"
+            id="chef-password"
+            name="chef-password"
+            placeholder="Mot de passe chef"
+            required
+            autocomplete="new-password"
+          />
+
+          <p class="login-error" id="chef-login-error" aria-live="polite"></p>
+        </div>
+
+        <div class="login-footer">
+          <button type="submit" class="primary">Se connecter</button>
+        </div>
+      </form>
+
+      <footer class="footer">
+        © Office Congolais de Contrôle · Département des systèmes d'information
+      </footer>
+    </div>
+
+    <script src="front-end/projet.js"></script>
+    <script>
+      // Valeurs par défaut des chefs (si rien n'a été créé par l'admin)
+      const CHEF_PAR_DEFAUT = {};
+      DEPARTEMENTS.forEach(function (d) {
+        CHEF_PAR_DEFAUT[d.id] = { matricule: "CHEF" + d.id.toUpperCase(), password: "chef" + d.id + "123" };
+      });
+
+      function chargerChefs() {
+        try {
+          const stock = JSON.parse(localStorage.getItem("occ-chefs") || "{}");
+          // Fusionne avec les valeurs par défaut pour les départements sans chef personnalisé
+          const chefs = {};
+          Object.keys(CHEF_PAR_DEFAUT).forEach(function (id) {
+            chefs[id] = stock[id] || CHEF_PAR_DEFAUT[id];
+          });
+          return chefs;
+        } catch (e) {
+          return CHEF_PAR_DEFAUT;
+        }
+      }
+
+      const CHEF_IDS = chargerChefs();
+
+      DEPARTEMENTS.forEach(function (d) {
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.nom;
+        document.getElementById("chef-departement").appendChild(opt);
+      });
+
+      document.getElementById("chef-login-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const deptId = document.getElementById("chef-departement").value;
+        const matricule = document.getElementById("chef-matricule").value.trim();
+        const pass = document.getElementById("chef-password").value;
+        const err = document.getElementById("chef-login-error");
+        err.textContent = "";
+
+        const c = CHEF_IDS[deptId];
+        if (c && c.matricule === matricule && c.password === pass) {
+          localStorage.setItem("occ-chef-auth", matricule);
+          localStorage.setItem("occ-chef-dept", deptId);
+          window.location.href = "chef.html?dept=" + deptId;
+        } else {
+          err.textContent = "Matricule ou mot de passe chef incorrect.";
+        }
+      });
+    </script>
+  </body>
+</html>

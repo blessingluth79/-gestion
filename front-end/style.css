@@ -1,0 +1,973 @@
+/* ==========================================================
+   OCC - Parc informatique
+   Feuille de style professionnelle
+   ========================================================== */
+
+/* 1. Variables : toutes les couleurs et mesures au même endroit */
+:root {
+  --primary: #0b3d91;
+  --primary-dark: #072a66;
+  --primary-light: #3b78d8;
+  --secondary: #c8102e;
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --text: #1b2433;
+  --muted: #5b6678;
+  --line: #dde3ee;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(16, 24, 40, 0.08), 0 8px 24px rgba(16, 24, 40, 0.06);
+
+  /* couleurs des états */
+  --ok-bg: #e3f6ea;      --ok-text: #14693a;
+  --good-bg: #e2edff;    --good-text: #1747a6;
+  --warn-bg: #fff2d9;    --warn-text: #8a5a00;
+}
+
+/* 2. Base */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* 3. En-tête : bleu uni + fine bande rouge (couleurs du drapeau) */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 48px;
+  background: var(--primary-dark);
+  border-bottom: 4px solid var(--secondary);
+  box-shadow: 0 3px 0 #f7c600; /* fine ligne jaune sous la bande rouge */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  display: block;
+}
+
+.brand {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav a:hover,
+.nav a.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+/* 4. Contenu principal */
+.container {
+  flex: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 24px 56px;
+}
+
+.hero {
+  text-align: center;
+  padding: 24px 16px 8px;
+}
+
+.hero h1 {
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+  margin: 8px 0 12px;
+  color: var(--primary-dark);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.hero h3 {
+  margin: 10px 0 4px;
+  font-size: 1.1rem;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--secondary);
+  font-weight: 700;
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.entity {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 6px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 600;
+  background: var(--surface);
+}
+
+.subtitle {
+  max-width: 680px;
+  margin: 18px auto 0;
+  font-size: 1.05rem;
+  color: var(--muted);
+}
+
+.actions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* 5. Boutons */
+button,
+.button-link {
+  border: none;
+  border-radius: 8px;
+  padding: 13px 26px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.2;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.primary {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(11, 61, 145, 0.25);
+}
+
+.primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.secondary {
+  background: var(--surface);
+  color: var(--primary-dark);
+  border: 1px solid var(--line);
+}
+
+/* 6. Barre d'outils au-dessus du tableau (recherche + impression) */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.toolbar input {
+  flex: 1 1 280px;
+  max-width: 380px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.toolbar input:focus {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 1px;
+}
+
+.toolbar .button-link,
+.toolbar button {
+  padding: 10px 20px;
+}
+
+/* 7. Tableau */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.inventory-table {
+  width: 100%;
+  min-width: 1500px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+}
+
+.inventory-table th,
+.inventory-table td {
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  padding: 11px 10px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.88rem;
+}
+
+.inventory-table th:last-child,
+.inventory-table td:last-child {
+  border-right: none;
+}
+
+/* Ligne 1 de l'en-tête : groupes */
+.inventory-table thead tr:first-child th {
+  background: var(--primary-dark);
+  color: #fff;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-right-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Ligne 2 de l'en-tête : colonnes */
+.inventory-table thead tr:nth-child(2) th {
+  background: #e9eef8;
+  color: var(--primary-dark);
+  font-weight: 700;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.inventory-table tbody tr:nth-child(even) {
+  background: #f8faff;
+}
+
+.inventory-table tbody tr:hover {
+  background: #eef4ff;
+}
+
+/* Première colonne (numéro) en gras et centrée */
+.inventory-table tbody td:first-child {
+  font-weight: 700;
+  color: var(--primary);
+  background: #f1f4fa;
+}
+
+/* Cellules vides : tiret discret pour montrer qu'il reste à renseigner */
+.inventory-table td:empty::after {
+  content: "—";
+  color: #b8c0cf;
+}
+
+/* 8. Badges d'état (Excellent / Bon / Correct) */
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.badge-excellent { background: var(--ok-bg);   color: var(--ok-text); }
+.badge-bon       { background: var(--good-bg); color: var(--good-text); }
+.badge-correct   { background: var(--warn-bg); color: var(--warn-text); }
+
+/* 9. Pied de page */
+.footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+/* 10. Mobile */
+@media (max-width: 700px) {
+  .topbar {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+    position: static;
+  }
+
+  .brand {
+    font-size: 0.85rem;
+  }
+
+  .container {
+    padding: 24px 12px 40px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}
+
+/* 11. Impression : on masque la navigation et on garde le tableau lisible */
+@media print {
+  .topbar,
+  .toolbar,
+  .footer,
+  .actions {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .table-wrap {
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .inventory-table {
+    min-width: 0;
+  }
+
+  .inventory-table th,
+  .inventory-table td {
+    font-size: 0.65rem;
+    padding: 4px;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+}
+
+/* ==========================================================
+   12. Page Départements : cartes cliquables
+   ========================================================== */
+.dept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
+  margin-top: 36px;
+  margin-bottom: 36px;
+}
+
+/* ==========================================================
+   12b. Page Login : formulaire centré
+   ========================================================== */
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 4px);
+}
+
+.login-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  width: 100%;
+  max-width: 380px;
+  overflow: hidden;
+}
+
+.login-header {
+  text-align: center;
+  padding: 36px 24px 8px;
+}
+
+.login-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid rgba(11, 61, 145, 0.15);
+  box-shadow: 0 2px 12px rgba(16, 24, 40, 0.1);
+  display: block;
+  margin: 0 auto 16px;
+}
+
+.login-card h1 {
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+  color: var(--primary-dark);
+}
+
+.login-subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.login-body {
+  padding: 24px;
+}
+
+.login-body label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.login-body input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+  margin-bottom: 18px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-body input:focus {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 1px;
+}
+
+.login-error {
+  color: var(--secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 6px 0 0;
+  min-height: 1.2em;
+}
+
+.login-footer {
+  padding: 16px 24px 24px;
+  text-align: center;
+}
+
+.login-footer .primary {
+  width: 100%;
+}
+
+/* ==========================================================
+   14. Page Administration : gestion des membres
+   ========================================================== */
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.admin-actions button {
+  padding: 10px 20px;
+}
+
+.admin-section {
+  margin-top: 40px;
+}
+
+.admin-section-title {
+  font-size: 1.15rem;
+  color: var(--primary-dark);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-admin {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 24px;
+  box-shadow: var(--shadow);
+}
+
+.form-admin > div label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.form-admin input,
+.form-admin select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.form-admin input:focus,
+.form-admin select:focus {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 1px;
+}
+
+.form-admin .btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+.form-admin .btn-row button {
+  padding: 10px 20px;
+}
+
+@media (max-width: 700px) {
+  .form-admin {
+    grid-template-columns: 1fr;
+  }
+
+  .form-admin .btn-row {
+    flex-direction: column;
+  }
+
+  .form-admin .btn-row button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 700px) {
+  .login-header {
+    padding: 28px 16px 0;
+  }
+
+  .login-body {
+    padding: 16px;
+  }
+
+  .login-footer {
+    padding: 12px 16px 24px;
+  }
+}
+
+.dept-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 26px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--primary);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-top-color 0.15s ease;
+}
+
+.dept-card:hover {
+  transform: translateY(-3px);
+  border-top-color: var(--secondary);
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.1), 0 14px 32px rgba(16, 24, 40, 0.1);
+}
+
+.dept-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #e9eef8;
+  color: var(--primary-dark);
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+}
+
+.dept-card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--primary-dark);
+}
+
+.dept-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.dept-link {
+  margin-top: 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--primary);
+}
+
+/* ==========================================================
+   13. Page Service : fil d'Ariane, onglets des mois, saisie
+   ========================================================== */
+.breadcrumb {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.breadcrumb a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.month-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.year-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.year-pick select {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+
+.tab {
+  padding: 9px 16px;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.tab:hover {
+  color: var(--primary-dark);
+  border-color: var(--primary-light);
+}
+
+.tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* Onglet de mois verrouillé (octobre+) */
+.tab.locked {
+  background: #f8f9fa;
+  color: #9aa4b2;
+  border-color: #c0c8d8;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.lock-icon {
+  font-size: 0.75em;
+  margin-left: 4px;
+}
+
+/* Bouton désactivé */
+button:disabled,
+.toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Inputs et selects en lecture seule (mois verrouillé) */
+.inventory-table td input:read-only,
+.inventory-table td select:disabled {
+  background: #f8f9fa;
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.hint {
+  margin: 12px 4px 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Cellules saisissables : elles ressemblent à du texte jusqu'au clic */
+.inventory-table td input,
+.inventory-table td select {
+  width: 100%;
+  min-width: 90px;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+}
+
+.inventory-table td input:hover,
+.inventory-table td select:hover {
+  border-color: var(--line);
+  background: #fff;
+}
+
+.inventory-table td input:focus,
+.inventory-table td select:focus {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 0;
+  background: #fff;
+}
+
+/* Listes « État » colorées comme les badges */
+.inventory-table td select.etat {
+  min-width: 110px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.etat-excellent { background: var(--ok-bg) !important;   color: var(--ok-text); }
+.etat-bon       { background: var(--good-bg) !important; color: var(--good-text); }
+.etat-correct   { background: var(--warn-bg) !important; color: var(--warn-text); }
+.etat-mauvais   { background: #fde4e4 !important;        color: #a31212; }
+
+@media print {
+  .month-bar,
+  .hint {
+    display: none;
+  }
+
+  .inventory-table td input,
+  .inventory-table td select {
+    min-width: 0;
+    padding: 0;
+    border: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+}
+/* ==========================================================
+   OCC - Page de connexion
+   Couleurs : bleu, jaune, rouge, blanc (chargé après style.css)
+   ========================================================== */
+
+:root {
+  --accent: #f7c600; /* jaune */
+}
+
+/* Fond bleu dégradé avec motif léger */
+.login-page {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(247, 198, 0, 0.18), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(200, 16, 46, 0.22), transparent 45%),
+    linear-gradient(135deg, #072a66 0%, #0b3d91 60%, #1553b8 100%);
+  color: #fff;
+}
+
+.login-wrapper {
+  min-height: 100vh;
+  padding: 24px 16px;
+  gap: 18px;
+}
+
+/* Carte blanche */
+.login-card {
+  max-width: 420px;
+  border: none;
+  border-radius: 16px;
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+/* Bande tricolore en haut de la carte */
+.flag-bar {
+  display: flex;
+  height: 8px;
+}
+.flag-bar span { flex: 1; }
+.flag-bar span:nth-child(1) { background: var(--primary); }
+.flag-bar span:nth-child(2) { background: var(--accent); }
+.flag-bar span:nth-child(3) { background: var(--secondary); }
+
+.login-header {
+  padding: 32px 28px 4px;
+}
+
+.login-logo {
+  width: 84px;
+  height: 84px;
+  border: 3px solid var(--accent);
+  box-shadow: 0 4px 16px rgba(7, 42, 102, 0.25);
+}
+
+.login-card h1 {
+  font-size: 1.55rem;
+  color: var(--primary-dark);
+}
+
+.login-subtitle {
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+}
+
+.login-subtitle.small {
+  margin-top: 4px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.login-body {
+  padding: 22px 28px 6px;
+}
+
+.login-body label {
+  color: var(--primary-dark);
+}
+
+.login-body input,
+.login-body select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--text);
+  margin-bottom: 18px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-body input:focus,
+.login-body select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(247, 198, 0, 0.45); /* halo jaune */
+}
+
+/* Champ mot de passe + bouton Afficher */
+.pass-wrap {
+  position: relative;
+}
+.pass-wrap input {
+  padding-right: 92px;
+}
+.pass-toggle {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 7px 12px;
+  font-size: 0.78rem;
+  background: #eef2fa;
+  color: var(--primary-dark);
+  border-radius: 7px;
+}
+.pass-toggle:hover {
+  background: var(--accent);
+}
+
+.login-error {
+  color: var(--secondary);
+  margin: -6px 0 6px;
+}
+
+.login-footer {
+  padding: 8px 28px 28px;
+}
+
+.login-footer .primary {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border-bottom: 3px solid var(--secondary);
+}
+
+.login-copy {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .login-header { padding: 26px 18px 0; }
+  .login-body { padding: 18px 18px 4px; }
+  .login-footer { padding: 8px 18px 24px; }
+}

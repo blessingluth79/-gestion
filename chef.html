@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCC | Chef de département</title>
+    <link rel="stylesheet" href="front-end/style.css" />
+  </head>
+  <body>
+    <script>
+      if (!localStorage.getItem("occ-chef-auth")) {
+        location.replace("chef-login.html");
+      }
+    </script>
+
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img src="logo.jpg" alt="Logo OCC" class="logo" />
+        <div class="brand">Office Congolais de Contrôle</div>
+      </div>
+      <nav class="nav">
+        <a href="front-end/index.html">Accueil</a>
+        <a href="front-end/departement.html">Départements</a>
+        <a href="chef.html" class="active">Chef Département</a>
+        <a href="#" id="logout-chef" title="Déconnexion">Déconnexion</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <p class="eyebrow">Validation des inventaires</p>
+        <h1>Chef de Département</h1>
+        <p class="subtitle" id="chef-dept-info"></p>
+      </section>
+
+      <div class="toolbar">
+        <label class="year-pick">
+          Année
+          <select id="chef-annee"></select>
+        </label>
+        <div style="margin-left:auto; font-size:0.85rem; color:var(--muted);">
+          <span id="chef-stats"></span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="inventory-table" id="chef-table">
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Statut</th>
+              <th>Commentaire</th>
+              <th>Lignes saisies</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="chef-body"></tbody>
+        </table>
+      </div>
+
+      <div class="admin-actions" style="margin-top: 20px;">
+        <button type="button" class="secondary" id="chef-voir-inventaire">Voir l'inventaire détaillé</button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      © Office Congolais de Contrôle · Département des systèmes d'information
+    </footer>
+
+    <script src="front-end/projet.js"></script>
+    <script>
+      const CHEF_IDS = {};
+      DEPARTEMENTS.forEach(function (d) {
+        CHEF_IDS[d.id] = { matricule: "CHEF" + d.id.toUpperCase(), password: "chef" + d.id + "123" };
+      });
+
+      const elAnnee = document.getElementById("chef-annee");
+      const elBody = document.getElementById("chef-body");
+      const elDeptInfo = document.getElementById("chef-dept-info");
+      const elStats = document.getElementById("chef-stats");
+
+      let annee = ANNEE_COURANTE;
+      let deptId = null;
+
+      // Détecte le département du chef depuis l'URL ou le premier chef disponible
+      const urlDept = new URLSearchParams(location.search).get("dept");
+      if (urlDept && CHEF_IDS[urlDept]) {
+        deptId = urlDept;
+      } else {
+        deptId = Object.keys(CHEF_IDS)[0];
+      }
+
+      const chefCreds = CHEF_IDS[deptId];
+      const deptNom = DEPARTEMENTS.find(function (d) { return d.id === deptId; }).nom;
+      elDeptInfo.textContent = "Département : " + deptNom + "  ·  Matricule chef : " + chefCreds.matricule;
+
+      // Années
+      for (let a = ANNEE_COURANTE - 2; a <= ANNEE_COURANTE + 1; a++) {
+        const o = document.createElement("option");
+        o.value = a;
+        o.textContent = a;
+        if (a === annee) o.selected = true;
+        elAnnee.appendChild(o);
+      }
+      elAnnee.addEventListener("change", function () {
+        annee = Number(elAnnee.value);
+        dessiner();
+      });
+
+      // Clé de validation
+      function cleVal(dept, a, m) {
+        return "occ-val:" + dept + ":" + a + ":" + m;
+      }
+
+      function chargerVal(dept, a, m) {
+        try {
+          return JSON.parse(localStorage.getItem(cleVal(dept, a, m)));
+        } catch (e) {
+          return { statut: "en_attente", commentaire: "" };
+        }
+      }
+
+      function sauverVal(dept, a, m, val) {
+        localStorage.setItem(cleVal(dept, a, m), JSON.stringify(val));
+      }
+
+      function lignesSaisies(dept, a, m) {
+        const lignes = chargerLignes(dept, a, m);
+        return lignes.filter(ligneRemplie).length;
+      }
+
+      function statBadge(statut) {
+        const span = document.createElement("span");
+        span.className = "badge";
+        if (statut === "valide") {
+          span.className = "badge badge-excellent";
+          span.textContent = "Validé";
+        } else if (statut === "rejete") {
+          span.className = "badge badge-correct";
+          span.textContent = "Rejeté";
+        } else {
+          span.className = "badge badge-bon";
+          span.textContent = "En attente";
+        }
+        return span;
+      }
+
+      function dessiner() {
+        elBody.innerHTML = "";
+        let nValide = 0, nRejete = 0, nAttente = 0;
+
+        MOIS.forEach(function (nom, i) {
+          const val = chargerVal(deptId, annee, i);
+          if (val.statut === "valide") nValide++;
+          else if (val.statut === "rejete") nRejete++;
+          else nAttente++;
+
+          const tr = document.createElement("tr");
+
+          const tdMois = document.createElement("td");
+          tdMois.textContent = nom;
+          tr.appendChild(tdMois);
+
+          const tdStat = document.createElement("td");
+          tdStat.appendChild(statBadge(val.statut));
+          tr.appendChild(tdStat);
+
+          const tdCom = document.createElement("td");
+          tdCom.textContent = val.commentaire || "—";
+          tr.appendChild(tdCom);
+
+          const tdNb = document.createElement("td");
+          tdNb.textContent = lignesSaisies(deptId, annee, i);
+          tr.appendChild(tdNb);
+
+          const tdAct = document.createElement("td");
+          tdAct.style.display = "flex";
+          tdAct.style.gap = "6px";
+
+          const btnValider = document.createElement("button");
+          btnValider.type = "button";
+          btnValider.textContent = "Valider";
+          btnValider.className = "primary";
+          btnValider.style.padding = "6px 14px";
+          btnValider.style.fontSize = "0.85rem";
+          btnValider.disabled = val.statut === "valide";
+          btnValider.onclick = function () {
+            if (confirm("Valider l'inventaire de " + nom + " " + annee + " ?")) {
+              sauverVal(deptId, annee, i, { statut: "valide", commentaire: "" });
+              dessiner();
+            }
+          };
+
+          const btnRenvoyer = document.createElement("button");
+          btnRenvoyer.type = "button";
+          btnRenvoyer.textContent = "Renvoyer";
+          btnRenvoyer.className = "secondary";
+          btnRenvoyer.style.padding = "6px 14px";
+          btnRenvoyer.style.fontSize = "0.85rem";
+          btnRenvoyer.style.color = "#a31212";
+          btnRenvoyer.disabled = val.statut === "rejete";
+          btnRenvoyer.onclick = function () {
+            const com = prompt("Motif du renvoi :");
+            sauverVal(deptId, annee, i, { statut: "rejete", commentaire: com || "" });
+            dessiner();
+          };
+
+          const btnVoir = document.createElement("button");
+          btnVoir.type = "button";
+          btnVoir.textContent = "Voir détail";
+          btnVoir.className = "secondary";
+          btnVoir.style.padding = "6px 14px";
+          btnVoir.style.fontSize = "0.85rem";
+          btnVoir.onclick = function () {
+            window.open("front-end/service.html?dept=" + deptId + "&chef=1", "_blank");
+          };
+
+          tdAct.appendChild(btnValider);
+          tdAct.appendChild(btnRenvoyer);
+          tdAct.appendChild(btnVoir);
+          tr.appendChild(tdAct);
+
+          elBody.appendChild(tr);
+        });
+
+        elStats.textContent = nValide + " validé · " + nRejete + " rejeté · " + nAttente + " en attente";
+      }
+
+      document.getElementById("logout-chef").addEventListener("click", function (e) {
+        e.preventDefault();
+        localStorage.removeItem("occ-chef-auth");
+        location.replace("chef-login.html");
+      });
+
+      dessiner();
+    </script>
+  </body>
+</html>

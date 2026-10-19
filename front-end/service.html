@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCC | Inventaire du département</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <script>
+      if (!localStorage.getItem("occ-auth")) {
+        location.replace("login.html");
+      }
+    </script>
+
+    <header class="topbar">
+      <div class="brand-wrap">
+        <img src="../logo.jpg" alt="Logo OCC" class="logo" />
+        <div class="brand">Office Congolais de Contrôle</div>
+      </div>
+      <nav class="nav">
+        <a href="index.html">Accueil</a>
+        <a href="departement.html">Départements</a>
+        <a href="../chef-login.html">Chef Département</a>
+        <a href="#" id="logout" title="Déconnexion">Déconnexion</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+          <a href="departement.html">Départements</a> › <span id="crumb-dept"></span>
+        </nav>
+        <p class="eyebrow">Inventaire du parc informatique</p>
+        <h1 id="titre">Département</h1>
+      </section>
+
+      <!-- Sélecteur d'année + onglets des 12 mois -->
+      <div class="month-bar">
+        <label class="year-pick">
+          Année
+          <select id="annee"></select>
+        </label>
+        <div class="tabs" id="tabs" role="tablist"></div>
+      </div>
+
+      <div class="toolbar">
+        <input type="search" id="search" placeholder="Rechercher dans ce mois…" aria-label="Rechercher" />
+        <div class="toolbar-actions">
+          <button type="button" class="secondary" id="ajout">+ Ajouter une ligne</button>
+          <button type="button" class="primary" onclick="window.print()">Imprimer</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="inventory-table" id="inventory">
+          <thead>
+            <tr>
+              <th colspan="3">Identification utilisateur</th>
+              <th colspan="8">Fiche technique ordinateur</th>
+              <th colspan="2">Imprimante</th>
+              <th colspan="2">Onduleur</th>
+            </tr>
+            <tr>
+              <th>N°</th>
+              <th>Nom</th>
+              <th>Affectation / Div / Service</th>
+              <th>Modèle</th>
+              <th>RAM</th>
+              <th>HDD / SSD</th>
+              <th>CPU</th>
+              <th>Logiciels métiers</th>
+              <th>Autres logiciels</th>
+              <th>Année d’acqui</th>
+              <th>État</th>
+              <th>Modèle</th>
+              <th>État</th>
+              <th>Modèle</th>
+              <th>État</th>
+            </tr>
+          </thead>
+          <tbody id="corps"></tbody>
+        </table>
+      </div>
+      <p class="hint">Les données sont enregistrées automatiquement sur cet ordinateur.</p>
+    </main>
+
+    <footer class="footer">
+      © Office Congolais de Contrôle · Département des systèmes d'information
+    </footer>
+
+    <script src="projet.js"></script>
+    <script>
+      // 1. Quel département ? On le lit dans l'adresse : service.html?dept=audit
+      const idDept = new URLSearchParams(location.search).get("dept");
+      const dept = DEPARTEMENTS.find((d) => d.id === idDept);
+
+      if (!dept) {
+        // adresse sans département valide : retour à la liste
+        location.replace("departement.html");
+      }
+
+      // Mode chef : autorise l'écriture même si le mois est validé
+      const modeChef = new URLSearchParams(location.search).get("chef") === "1";
+
+      document.title = "OCC | Inventaire " + dept.nom;
+      document.getElementById("crumb-dept").textContent = dept.nom;
+      document.getElementById("titre").textContent = "Inventaire — " + dept.nom;
+
+      // 2. État de la page : année et mois affichés, lignes du mois
+      let annee = ANNEE_COURANTE;
+      let mois = new Date().getMonth(); // 0 = janvier
+      let lignes = [];
+
+      const NB_COLONNES = 14;       // colonnes saisissables (hors N°)
+      const COLONNES_ETAT = [9, 11, 13]; // colonnes qui sont des listes « État »
+      const LIGNES_MIN = 15;        // nombre de lignes affichées au minimum
+
+      // En octobre, les mois précédents sont verrouillés en écriture
+      const MOIS_COURANT = new Date().getMonth(); // 0 = janvier
+      const VERROILLER_MOIS_PASSE = MOIS_COURANT >= 9; // octobre ou +
+
+      function cleVal(dept, a, m) {
+        return "occ-val:" + dept + ":" + a + ":" + m;
+      }
+
+      function chargerVal(dept, a, m) {
+        try {
+          return JSON.parse(localStorage.getItem(cleVal(dept, a, m)));
+        } catch (e) {
+          return { statut: "en_attente", commentaire: "" };
+        }
+      }
+
+      function estMoisVerrouille(m) {
+        return VERROILLER_MOIS_PASSE && m < MOIS_COURANT;
+      }
+
+      function estMoisValide(m) {
+        const v = chargerVal(dept.id, annee, m);
+        return v && v.statut === "valide";
+      }
+
+      function estMoisBloque(m) {
+        if (modeChef) return false;
+        return estMoisVerrouille(m) || estMoisValide(m);
+      }
+
+      const elTabs = document.getElementById("tabs");
+      const elCorps = document.getElementById("corps");
+      const elAnnee = document.getElementById("annee");
+      const elSearch = document.getElementById("search");
+
+      // 3. Liste des années (2 ans avant et 1 an après l'année courante)
+      for (let a = ANNEE_COURANTE - 2; a <= ANNEE_COURANTE + 1; a++) {
+        const o = document.createElement("option");
+        o.value = a;
+        o.textContent = a;
+        if (a === annee) o.selected = true;
+        elAnnee.appendChild(o);
+      }
+      elAnnee.addEventListener("change", () => {
+        annee = Number(elAnnee.value);
+        charger();
+      });
+
+      // 4. Onglets des mois (un point indique un mois déjà renseigné)
+      function dessinerOnglets() {
+        elTabs.innerHTML = "";
+        MOIS.forEach((nom, i) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "tab" + (i === mois ? " active" : "");
+          b.setAttribute("role", "tab");
+          const rempli = chargerLignes(dept.id, annee, i).some(ligneRemplie);
+          b.textContent = nom + (rempli ? " •" : "");
+
+          // Mois verrouillé en lecture seule (octobre+ passé, ou validé par le chef)
+          if (estMoisVerrouille(i) || estMoisValide(i)) {
+            b.classList.add("locked");
+            b.setAttribute("title", "Mois en lecture seule — pas d'écriture");
+            b.innerHTML += ' <span class="lock-icon" aria-hidden="true">🔒</span>';
+          }
+
+          b.addEventListener("click", function () {
+            mois = i;
+            charger();
+          });
+          elTabs.appendChild(b);
+        });
+      }
+
+      // 5. Charge les lignes du mois choisi et complète jusqu'au minimum
+      function charger() {
+        lignes = chargerLignes(dept.id, annee, mois);
+        while (lignes.length < LIGNES_MIN) {
+          lignes.push(new Array(NB_COLONNES).fill(""));
+        }
+        elSearch.value = "";
+        dessinerOnglets();
+        dessinerTableau();
+      }
+
+      // 6. Dessine le tableau : une ligne <tr> par équipement
+      function dessinerTableau() {
+        elCorps.innerHTML = "";
+        lignes.forEach((ligne, r) => {
+          const tr = document.createElement("tr");
+
+          const num = document.createElement("td"); // colonne N°
+          num.textContent = r + 1;
+          tr.appendChild(num);
+
+          for (let c = 0; c < NB_COLONNES; c++) {
+            const td = document.createElement("td");
+            td.appendChild(COLONNES_ETAT.includes(c)
+              ? creerListeEtat(r, c)
+              : creerChamp(r, c));
+            tr.appendChild(td);
+          }
+          elCorps.appendChild(tr);
+        });
+      }
+
+      // Champ texte pour une cellule
+      function creerChamp(r, c) {
+        const i = document.createElement("input");
+        i.type = "text";
+        i.value = lignes[r][c] || "";
+        i.setAttribute("aria-label", "Ligne " + (r + 1) + ", colonne " + (c + 1));
+        i.readOnly = estMoisBloque(mois);
+        i.addEventListener("input", () => {
+          lignes[r][c] = i.value;
+          enregistrer();
+        });
+        return i;
+      }
+
+      // Liste déroulante pour les colonnes « État », colorée selon la valeur
+      function creerListeEtat(r, c) {
+        const s = document.createElement("select");
+        ETATS.forEach((e) => {
+          const o = document.createElement("option");
+          o.value = e;
+          o.textContent = e || "—";
+          s.appendChild(o);
+        });
+        s.value = lignes[r][c] || "";
+        const verrouille = estMoisBloque(mois);
+        s.disabled = verrouille;
+        const colorer = () => {
+          s.className = "etat" + (s.value ? " etat-" + s.value.toLowerCase() : "");
+        };
+        colorer();
+        s.addEventListener("change", () => {
+          if (verrouille) return;
+          lignes[r][c] = s.value;
+          colorer();
+          enregistrer();
+        });
+        return s;
+      }
+
+      // 7. Sauvegarde automatique à chaque modification
+      function enregistrer() {
+        sauverLignes(dept.id, annee, mois, lignes);
+        // met à jour le petit point sur l'onglet du mois
+        const rempli = lignes.some(ligneRemplie);
+        const onglet = elTabs.children[mois];
+        onglet.innerHTML = MOIS[mois] + (rempli ? " •" : "") +
+          (estMoisBloque(mois) ? ' <span class="lock-icon" aria-hidden="true">🔒</span>' : "");
+      }
+
+      // 8. Bouton « Ajouter une ligne »
+      const btnAjout = document.getElementById("ajout");
+      btnAjout.disabled = estMoisBloque(mois);
+      btnAjout.addEventListener("click", () => {
+        if (btnAjout.disabled) return;
+        lignes.push(new Array(NB_COLONNES).fill(""));
+        dessinerTableau();
+        enregistrer();
+      });
+
+      // 9. Recherche : on cache les lignes qui ne contiennent pas le texte
+      elSearch.addEventListener("input", () => {
+        const terme = elSearch.value.toLowerCase().trim();
+        [...elCorps.children].forEach((tr, r) => {
+          const texte = lignes[r].join(" ").toLowerCase();
+          tr.style.display = texte.includes(terme) ? "" : "none";
+        });
+      });
+
+      charger(); // premier affichage
+    </script>
+  </body>
+</html>
